@@ -1,5 +1,8 @@
 package com.ponomarev.receivercompanion;
 
+import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -9,9 +12,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import com.ponomarev.receivercompanion.connection.Bluetooth;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final int SELECT_RECEIVER_REQUEST = 1;
+    private Bluetooth.BTBroadcastReceiver mBTBroadcastReceiver = new Bluetooth.BTBroadcastReceiver();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +44,8 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        Bluetooth mBluetooth = new Bluetooth(this);
     }
 
     @Override
@@ -78,9 +87,35 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         // Handle your own actions
+        if (id == R.id.selectReceiver) {
+            Intent intent = new Intent(this, SelectReceiverActivity.class);
+            startActivityForResult(intent, SELECT_RECEIVER_REQUEST);
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == SELECT_RECEIVER_REQUEST) {
+            if (resultCode == RESULT_OK) {
+
+            }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mBTBroadcastReceiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(mBTBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }
 }
